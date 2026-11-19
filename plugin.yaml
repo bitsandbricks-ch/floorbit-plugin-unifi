@@ -1,21 +1,22 @@
-# The manifest. Floorbit reads it before it runs any code: what the plugin may touch (uses), its
-# settings, and what the agent part may send. Field by field: Floorbit's docs/plugins.md.
-id: example                    # rename: lowercase letters, digits, dashes; the repo is floorbit-plugin-<id>
-name: Example reachability
-icon: network
-version: "0.1.0"
+# Switch status, ports and which port a player is on, from a UniFi Network controller. Off until
+# turned on under Settings > Plugins. It only reads: give it a View Only account.
+id: unifi
+name: UniFi
+icon: access-point
+version: "1.0.0"
 floorbit: ">=0.1,<2"
-description: "The local agent checks that a few services in the hall answer on their TCP port and the dashboard shows how many do."
+description: "Live status, ports and traffic of UniFi switches, and which switch port an IP or MAC is on (from the controller's client list). Feeds the floor plan, the status monitor, the seat inspector, the check-in page and the Wi-Fi view (access point load and client counts). Only reads: use a View Only account."
 author: Floorbit
-homepage: https://github.com/bitsandbricks-ch/floorbit-plugin-template
-uses: [agent, settings, widgets, storage]
+homepage: https://ui.com
+uses: [settings, http, monitoring, wifi]
 settings:
-  - {key: targets, label: Services, type: text, placeholder: "dns = 192.0.2.53:53\ncache = 192.0.2.80:80",
-     help: "One per line: a name = address:port. The agent tries to open a TCP connection to each."}
-  - {key: interval, label: Seconds between checks, type: int, default: 30, min: 5, max: 600}
-widgets:
-  - {id: summary, label: Services up, size: small, refresh: 30}
-agent:
-  sends:
-    # aggregate: counts only. Floorbit and the agent both refuse a payload with an address in it.
-    status: {privacy: aggregate, latest: true}
+  - {key: url, label: Controller URL, type: url, placeholder: "https://unifi.example.com",
+     help: "The UniFi console (UniFi OS) or the Network application. No path."}
+  - {key: unifi_os, label: UniFi OS console, type: bool, default: true,
+     help: "On for a Dream Machine, Cloud Key Gen2 or UniFi OS server. Off for the older Network application on port 8443."}
+  - {key: username, label: Username, type: string, help: "A local account with the View Only role."}
+  - {key: password, label: Password, type: secret}
+  - {key: site, label: Site, type: string, default: default,
+     help: "The site's short name (from the URL in the controller: /manage/<site>/...)."}
+  - {key: verify_ssl, label: Verify TLS certificates, type: bool, default: true,
+     help: "Consoles ship with a self-signed certificate. Turn it off only on a network you trust."}
